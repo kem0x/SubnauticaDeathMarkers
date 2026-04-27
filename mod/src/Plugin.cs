@@ -12,7 +12,7 @@ namespace SubnauticaDeathMarkers
     {
         public const string PluginGuid    = "com.kareem.deathmarkers";
         public const string PluginName    = "Death Markers";
-        public const string PluginVersion = "0.1.0";
+        public const string PluginVersion = "1.0.0";
 
         internal static Plugin Instance { get; private set; }
         internal static new ManualLogSource Logger;
@@ -27,7 +27,7 @@ namespace SubnauticaDeathMarkers
             ApiBaseUrl = Config.Bind(
                 "Network",
                 "ApiBaseUrl",
-                "http://127.0.0.1:8787",
+                "https://death-markers-api.kareemolim.workers.dev",
                 "Base URL of the Death Markers API.");
 
             GameId = Config.Bind(

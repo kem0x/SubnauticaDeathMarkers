@@ -36,7 +36,7 @@ Drop the SubnauticaDeathMarkers/ folder into:
 
     <Subnautica>\BepInEx\plugins\SubnauticaDeathMarkers\
 
-Requires BepInExPack_Subnautica + Nautilus (install both from Thunderstore first).
+Requires BepInExPack_Subnautica + Nautilus (install both from NexusMods first).
 
 Configuration: <Subnautica>\BepInEx\config\com.kareem.deathmarkers.cfg
 "@ | Set-Content -Path (Join-Path $pluginDir "README.txt") -Encoding UTF8
