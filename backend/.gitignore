@@ -1,0 +1,8 @@
+node_modules/
+.wrangler/
+.dev.vars
+dist/
+*.log
+
+# Account-tied infra — keep local. wrangler.toml.example is the template.
+wrangler.toml
