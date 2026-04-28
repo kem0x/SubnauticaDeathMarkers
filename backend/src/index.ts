@@ -10,6 +10,37 @@ type Bindings = {
   STATS_PAGE_URL?: string;
 };
 
+// Subnautica DamageType enum values (lowercase).
+const VALID_CAUSES = new Set([
+  'acid',
+  'cold',
+  'collide',
+  'drill',
+  'electrical',
+  'explosive',
+  'fire',
+  'heat',
+  'normal',
+  'poison',
+  'pressure',
+  'puncture',
+  'radiation',
+  'smoke',
+  'starve',
+]);
+
+// Rate limiter: 1 POST per 30 seconds per IP.
+const RATE_WINDOW_MS = 30_000;
+const ipLastPost = new Map<string, number>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const last = ipLastPost.get(ip);
+  if (last && now - last < RATE_WINDOW_MS) return true;
+  ipLastPost.set(ip, now);
+  return false;
+}
+
 type MarkerRow = {
   x: number;
   y: number;
@@ -38,6 +69,11 @@ app.use('/api/*', cors({ origin: '*', allowMethods: ['GET'] }));
 // ---------------------------------------------------------------------------
 
 app.post('/markers', async (c) => {
+  const ip = c.req.header('cf-connecting-ip') || 'unknown';
+  if (isRateLimited(ip)) {
+    return c.json({ error: 'rate limited' }, 429);
+  }
+
   const body = await c.req.json<{
     game?: string;
     x?: number;
@@ -54,12 +90,16 @@ app.post('/markers', async (c) => {
     return c.json({ error: 'game, x, y, z required' }, 400);
   }
 
+  const cause = body.cause?.toLowerCase().trim() ?? null;
+  if (cause && !VALID_CAUSES.has(cause)) {
+    return c.json({ error: 'invalid cause' }, 400);
+  }
+
   const chunkSize = Number(c.env.CHUNK_SIZE) || 200;
   const cx = Math.floor(x / chunkSize);
   const cy = Math.floor(y / chunkSize);
   const cz = Math.floor(z / chunkSize);
 
-  const cause = body.cause?.slice(0, 64) ?? null;
   const note = body.note?.slice(0, 280) ?? null;
 
   await c.env.death_markers.prepare(
